@@ -10,45 +10,44 @@ class Coin:
     コインをランダムに生成して描画するクラス
     """
     def __init__(self, screen_width, screen_height):
-        self.original_image = pg.image.load("fig/coin.png")
-        self.image = pg.transform.scale(self.original_image, (80, 80))
-        self.rect = self.image.get_rect()
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.speed = 3
-        self.active = False
-        self.spawn_timer = 0
+        self.original_image = pg.image.load("fig/coin.png")  # コインの画像を読み込む
+        self.image = pg.transform.scale(self.original_image, (80, 80))  # コインの大きさを決定
+        self.rect = self.image.get_rect()  # コインの画像の短形を取得
+        self.screen_width = screen_width  # 画面の幅を設定
+        self.screen_height = screen_height  # 画面の高さを設定
+        self.speed = 3  # コインの初期速度を設定
+        self.active = False  # コインが画面に表示されているかどうかを確認する
 
     def reset(self):
-        self.rect.x = self.screen_width
-        self.rect.y = random.randint(0, self.screen_height - self.rect.height)
-        self.speed = 3
-        self.active = True
+        self.rect.x = self.screen_width  # コインの初期位置を設定
+        self.rect.y = random.randint(0, self.screen_height - self.rect.height)  # コインの初期位置を画面内のランダムな高さに設定
+        self.speed = 3  # コインの速度を設定
+        self.active = True  # コインをアクティブにする
 
     def update(self):
-        if self.active:
-            self.rect.x -= self.speed
+        if self.active == True:
+            self.rect.x -= self.speed  # コインを移動させる
             if self.rect.right < 0:
-                self.active = False
+                self.active = False  # コインが画面外に出たときに、非アクティブにする
 
     def draw(self, screen):
-        if self.active:
-            screen.blit(self.image, self.rect)
+        if self.active == True:
+            screen.blit(self.image, self.rect)  # コインを描画する
 
 class Score:
     """
     取ったコインの数をスコアとして表示するクラス
     """
     def __init__(self):
-        self.font = pg.font.Font(None, 36)
-        self.score = 0
+        self.font = pg.font.Font(None, 36)  # フォントを設定
+        self.score = 0  # スコアを初期化
 
     def increment(self):
-        self.score += 1
+        self.score += 1  # スコアを1増加
 
     def draw(self, screen):
         score_surf = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
-        screen.blit(score_surf, (10, 10))
+        screen.blit(score_surf, (10, 10))  # スコアのテキストを描画
 
 def main():
     pg.display.set_caption("避けろ！こうかとん")
@@ -64,8 +63,8 @@ def main():
     coin = Coin(800, 600)
     score = Score()
 
-    spawn_interval = 100
-    spawn_timer = 0
+    spawn_interval = 100  # コインの生成間隔
+    spawn_timer = 0  # タイマーの初期化
 
     tmr = 0
     while True:
@@ -85,14 +84,14 @@ def main():
             x = -1
         kk_rct.move_ip([x, y])
 
-        if not coin.active == True:
+        if not coin.active == True:  # コインの生成を操作
             spawn_timer += 1
             if spawn_timer >= spawn_interval:
                 coin.reset()
                 spawn_timer = 0
 
-        coin.update()
-        if coin.active == True and kk_rct.colliderect(coin.rect):
+        coin.update()  # コインの更新
+        if coin.active == True and kk_rct.colliderect(coin.rect):  # こうかとんがコインに衝突したときの処理
             score.increment()
             coin.active = False
 
@@ -103,8 +102,8 @@ def main():
         screen.blit(bg_img2, [-z+4800, 0])
         screen.blit(kk_img, kk_rct)
 
-        coin.draw(screen)
-        score.draw(screen)
+        coin.draw(screen)  # コインの描画
+        score.draw(screen)  # スコアの描画
 
         pg.display.update()
         tmr += 1        
