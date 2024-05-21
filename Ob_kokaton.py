@@ -2,12 +2,22 @@ import os
 import sys
 import pygame as pg
 
+
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def gamengai_rect(rect, screen_rect): # 追加
+    rect.left = max(rect.left, screen_rect.left)
+    rect.right = min(rect.right, screen_rect.right)
+    rect.top = max(rect.top, screen_rect.top)
+    rect.bottom = min(rect.bottom, screen_rect.bottom)
 
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((800, 600))
+    screen_rect = screen.get_rect()# 追加
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_img2 = pg.transform.flip(bg_img, True, False)
@@ -31,6 +41,7 @@ def main():
         elif key_lst[pg.K_LEFT]:
             x = -2
         kk_rct.move_ip([x, y])
+        gamengai_rect(kk_rct, screen_rect) #追加
         z = tmr%3200
         screen.blit(bg_img, [-z, 0])
         screen.blit(bg_img2, [-z+1600, 0])
