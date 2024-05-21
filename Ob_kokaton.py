@@ -7,6 +7,15 @@ import pygame as pg
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
+class Score: #追加
+    def __init__(self):
+        self.value = 0
+        self.timer = 0 
+
+    def increase(self, amount):
+        self.value += amount
+
+
 def gamengai_rect(rect, dx, dy, screen): # 追加
     """
     画面外に行かないようにする関数
@@ -22,6 +31,7 @@ def gamengai_rect(rect, dx, dy, screen): # 追加
         rect.y = 0
     elif rect.y > screen.get_height() - rect.height:
         rect.y = screen.get_height() - rect.height
+
 
 def time(seconds): #追加
     """
@@ -48,6 +58,7 @@ def main():
     kk_rct.center = 300, 200
     font = pg.font.Font(None, 36) #追加
     tmr = 0
+    score = Score()#追加
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -78,8 +89,14 @@ def main():
         time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255)) 
         screen.blit(time_text, (20, 20)) 
         #追加↑
+        if tmr % 600 == 0: #追加    
+            score.increase(1) #追加
+        #追加↓
+        score_text = font.render("Score: {}".format(score.value), True, (255, 255, 255))
+        screen.blit(score_text, (20, 60))
+        #追加↑
         pg.display.update()
-        tmr += 1        
+        tmr += 1     
         clock.tick(200)
         
 
