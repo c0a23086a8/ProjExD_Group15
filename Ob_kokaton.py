@@ -7,12 +7,17 @@ import pygame as pg
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def gamengai_rect(rect, screen_rect): # 追加
-    rect.left = max(rect.left, screen_rect.left)
-    rect.right = min(rect.right, screen_rect.right)
-    rect.top = max(rect.top, screen_rect.top)
-    rect.bottom = min(rect.bottom, screen_rect.bottom)
-
+def gamengai_rect(rect, dx, dy, screen): # 追加
+    rect.x += dx
+    rect.y += dy
+    if rect.x < 0:
+        rect.x = 0
+    elif rect.x > screen.get_width() - rect.width:
+        rect.x = screen.get_width() - rect.width
+    if rect.y < 0:
+        rect.y = 0
+    elif rect.y > screen.get_height() - rect.height:
+        rect.y = screen.get_height() - rect.height
 
 def time(seconds): #追加
     hours = seconds // 3600
@@ -24,7 +29,6 @@ def time(seconds): #追加
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((800, 600))
-    screen_rect = screen.get_rect()# 追加
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_img2 = pg.transform.flip(bg_img, True, False)
@@ -40,16 +44,18 @@ def main():
         key_lst = pg.key.get_pressed()
         x = -1
         y = 0
+        dx = -0.5 #追加
+        dy = 0    #追加
         if key_lst[pg.K_UP]:
             y = -1
         elif key_lst[pg.K_DOWN]:
             y = 1
         elif key_lst[pg.K_RIGHT]:
-            x = 1
+            x = 2
         elif key_lst[pg.K_LEFT]:
-            x = -2
+            x = -1
         kk_rct.move_ip([x, y])
-        gamengai_rect(kk_rct, screen_rect) #追加
+        gamengai_rect(kk_rct, dx, dy, screen) #追加
         z = tmr%3200
         screen.blit(bg_img, [-z, 0])
         screen.blit(bg_img2, [-z+1600, 0])
