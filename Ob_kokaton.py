@@ -8,6 +8,10 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 def gamengai_rect(rect, dx, dy, screen): # 追加
+    """
+    画面外に行かないようにする関数
+    
+    """
     rect.x += dx
     rect.y += dy
     if rect.x < 0:
@@ -20,6 +24,12 @@ def gamengai_rect(rect, dx, dy, screen): # 追加
         rect.y = screen.get_height() - rect.height
 
 def time(seconds): #追加
+    """
+    経過時間の計算をする関数
+    hours   ; 時
+    minutes ; 分
+    seconds ; 秒
+    """
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     seconds = seconds % 60
@@ -40,12 +50,11 @@ def main():
     tmr = 0
     while True:
         for event in pg.event.get():
-            if event.type == pg.QUIT: return
+            if event.type == pg.QUIT: 
+                return
         key_lst = pg.key.get_pressed()
         x = -1
         y = 0
-        dx = -0.5 #追加
-        dy = 0    #追加
         if key_lst[pg.K_UP]:
             y = -1
         elif key_lst[pg.K_DOWN]:
@@ -55,6 +64,8 @@ def main():
         elif key_lst[pg.K_LEFT]:
             x = -1
         kk_rct.move_ip([x, y])
+        dx = -0.5 #追加
+        dy = 0    #追加
         gamengai_rect(kk_rct, dx, dy, screen) #追加
         z = tmr%3200
         screen.blit(bg_img, [-z, 0])
