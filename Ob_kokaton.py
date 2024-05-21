@@ -14,6 +14,13 @@ def gamengai_rect(rect, screen_rect): # 追加
     rect.bottom = min(rect.bottom, screen_rect.bottom)
 
 
+def time(seconds): #追加
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return hours, minutes, seconds
+
+
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((800, 600))
@@ -25,6 +32,7 @@ def main():
     kk_img = pg.transform.flip(kk_img, True, False)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    font = pg.font.Font(None, 36) #追加
     tmr = 0
     while True:
         for event in pg.event.get():
@@ -48,6 +56,11 @@ def main():
         screen.blit(bg_img, [-z+3200, 0])
         screen.blit(bg_img2, [-z+4800, 0])
         screen.blit(kk_img, kk_rct)
+        #追加↓
+        hours, minutes, seconds = time(tmr // 60)  
+        time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255)) 
+        screen.blit(time_text, (20, 20)) 
+        #追加↑
         pg.display.update()
         tmr += 1        
         clock.tick(200)
