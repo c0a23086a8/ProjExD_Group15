@@ -27,9 +27,9 @@ def main():
         elif key_lst[pg.K_DOWN]:
             y = 1
         elif key_lst[pg.K_RIGHT]:
-            x = 2
+            x = 1
         elif key_lst[pg.K_LEFT]:
-            x = -1
+            x = -2
         kk_rct.move_ip([x, y])
         z = tmr%3200
         screen.blit(bg_img, [-z, 0])
