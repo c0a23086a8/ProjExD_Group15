@@ -20,11 +20,6 @@ def main():
     kk_rct.center = 300, 200
     obstacles = []
     obstacle_timer = 0
-    obstacle_interval = 120
-    max_obtacles = 10
-    # obstacles = [Obstacle("fig/obstacle.png", rm.randint(700, 1000), rm.randint(100, 500), rm.randint(100, 300), 50)]
-    # obstacles = [Obstacle("fig/obstacle.png", rm.randint(1000, 1300), rm.randint(100, 500), rm.randint(100, 300), 50)]
-    # obstacles = [Obstacle("fig/obstacle.png", rm.randint(1300, 1600), rm.randint(100, 500), rm.randint(100, 300), 50)]
     tmr = 0
     while True:
         for event in pg.event.get():
@@ -50,16 +45,16 @@ def main():
         for obstacle in obstacles:
             obstacle.update()
             obstacle.draw(screen)
-            if kk_rct.colliderect(obstacle.rect):
-                time.sleep()
+            if kk_rct.colliderect(obstacle.rect): #障害物とこうかとんの衝突判定
+                time.sleep() #衝突判定
                 return
-        if obstacle_timer <= 0 and len(obstacles) < max_obtacles:
+        if obstacle_timer <= 0 and len(obstacles) < 10:
             x = rm.randint(800, 1600)
             y = rm.randint(100, 500)
             width = rm.randint(100, 300)
             height = 50
             obstacles.append(Obstacle("fig/obstacle.png", x, y, width, height))
-            obstacle_timer = obstacle_interval
+            obstacle_timer = 200
         else:
             obstacle_timer -= 1
         screen.blit(kk_img, kk_rct)
@@ -68,7 +63,7 @@ def main():
         clock.tick(200)
 
 
-class Obstacle:
+class Obstacle: #Obstacleクラス：障害物を描画
     def __init__(self, image_path, x, y, width, height):
         self.image = pg.transform.scale(pg.image.load(image_path), (width, height))
         self.rect = self.image.get_rect()
