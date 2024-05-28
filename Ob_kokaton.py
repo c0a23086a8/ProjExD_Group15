@@ -9,7 +9,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class Score: #追加
     def __init__(self):
-        self.value = 0
+        self.value = -1
         self.timer = 0 
 
     def increase(self, amount):
