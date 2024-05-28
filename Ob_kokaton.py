@@ -1,10 +1,14 @@
 import os
 import sys
+import random
 import pygame as pg
+import time
 import math
 
+
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-#タイトル画面
+
 class title():
         def __init__(self):
             self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 70)
@@ -16,13 +20,12 @@ class title():
             screen.blit(self.text, self.text_rect)
             pg.display.update()
             pg.display.flip()
-#ゲームオーバー画面
+
 class gameover():
         def __init__(self):
             self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 70)
             self.text = self.font.render("Game Over", True, (255, 255, 255))
             self.text_rect = self.text.get_rect(center=(800/2,600/2))
-
         def update(self,screen: pg.Surface):
             over_img = pg.Surface(( 800, 600 ))
             pg.draw.rect(over_img, (0, 0, 0),(0, 0, 800, 600) , 0)
@@ -31,7 +34,7 @@ class gameover():
             screen.blit(self.text, self.text_rect)
             pg.display.update()
             pg.display.flip()
-#死亡時演出
+
 class die():
     def __init__(self):
         self.x = 0
@@ -46,7 +49,7 @@ class die():
             y = self.y + int(math.sin(a) * self.radius)
             pg.draw.circle(screen, (255, 0, 0), (x, y), 30)
         pg.display.flip()
-#残機処理
+
 class zanki():
     def __init__(self):
         self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
@@ -57,28 +60,121 @@ class zanki():
         self.rect.center = 100, 50
     def update(self, screen:pg.surface):
         self.image = self.font.render(f"残機: {self.value}", 0, self.color)
-        screen.blit(self.image, self.rect)
+
+class Coin:
+    """
+    コインをランダムに生成して描画するクラス
+    """
+    def __init__(self, screen_width, screen_height):
+        self.original_image = pg.image.load("fig/coin.png")  # コインの画像を読み込む
+        self.image = pg.transform.scale(self.original_image, (80, 80))  # コインの大きさを決定
+        self.rect = self.image.get_rect()  # コインの画像の短形を取得
+        self.screen_width = screen_width  # 画面の幅を設定
+        self.screen_height = screen_height  # 画面の高さを設定
+        self.speed = 3  # コインの初期速度を設定
+        self.active = False  # コインが画面に表示されているかどうかを確認する
+
+    def reset(self):
+        self.rect.x = self.screen_width  # コインの初期位置を設定
+        self.rect.y = random.randint(0, self.screen_height - self.rect.height)  # コインの初期位置を画面内のランダムな高さに設定
+        self.speed = 3  # コインの速度を設定
+        self.active = True  # コインをアクティブにする
+
+    def update(self):
+        if self.active == True:
+            self.rect.x -= self.speed  # コインを移動させる
+            if self.rect.right < 0:
+                self.active = False  # コインが画面外に出たときに、非アクティブにする
+
+    def draw(self, screen):
+        if self.active == True:
+            screen.blit(self.image, self.rect)  # コインを描画する
+
+class Score:
+    """
+    取ったコインの数をスコアとして表示するクラス
+    """
+    def __init__(self):
+        self.font = pg.font.Font(None, 36)  # フォントを設定
+        self.score = -1  # スコアを初期化
+        self.timer = 0  # 追加
+
+    def increment(self):
+        self.score += 1  # スコアを1増加
+        
+    def increase(self, amount):#追加
+        self.score += amount
+
+    def draw(self, screen):
+        score_surf = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
+        screen.blit(score_surf, (20, 60))  # スコアのテキストを描画
+
+
+def gamengai_rect(rect, dx, dy, screen): # 追加
+    """
+    画面外に行かないようにする関数
+    
+    """
+    rect.x += dx
+    rect.y += dy
+    if rect.x < 0:
+        rect.x = 0
+    elif rect.x > screen.get_width() - rect.width:
+        rect.x = screen.get_width() - rect.width
+    if rect.y < 0:
+        rect.y = 0
+    elif rect.y > screen.get_height() - rect.height:
+        rect.y = screen.get_height() - rect.height
+
+
+def time(seconds): #追加
+    """
+    経過時間の計算をする関数
+    hours   ; 時
+    minutes ; 分
+    seconds ; 秒
+    """
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return hours, minutes, seconds
+
 
 def main():
-    pg.display.set_caption("さけろ！こうかとん")
+    pg.display.set_caption("避けろ！こうかとん")
     screen = pg.display.set_mode((800, 600))
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_img2 = pg.transform.flip(bg_img, True, False)
     kk_img = pg.image.load("fig/3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    title_screen = title()
-    over = gameover()
-    zan = zanki()
-    dead = die()
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
-    tmr = 0
+    obstacles = []
+    obstacle_timer = 0
+    obstacle_interval = 120
+    max_obtacles = 10
+    title_screen = title()
+    over = gameover()
+    dead = die()
     start = True
     end = False
     anime = True
     frame = 0
+    zan = zanki()
+
+    coin = Coin(800, 600)
+    score = Score()
+
+    spawn_interval = 100  # コインの生成間隔
+    spawn_timer = 0  # タイマーの初期化
+
+
+    font = pg.font.Font(None, 36) #追加
+    tmr = 0
+    
     while True:
+        
         while start:
                 #タイトルスクリーンループ
                 for event in pg.event.get():
@@ -89,9 +185,8 @@ def main():
                       if event.key == pg.K_RETURN:
                         start = False
                         zan.value = 2
-                        kk_rct.center = 300, 200
                 title_screen.update(screen)
-        #試験残機減らす試験
+        #試験
         for event in pg.event.get():
                     if event.type == pg.QUIT:
                         pg.quit()
@@ -99,7 +194,7 @@ def main():
                     if event.type == pg.KEYDOWN:
                       if event.key == pg.K_q:
                         zan.value -= 1
-        #死亡時演出
+
         if zan.value == 0:
             while anime:
                 screen.blit(bg_img, [-z, 0])
@@ -116,7 +211,10 @@ def main():
             dead.radius = 0
             anime = True
             end = True
-        #ゲームオーバー画面ループ
+
+        for event in pg.event.get():
+
+            if event.type == pg.QUIT: return
         while end:
             for event in pg.event.get():
                     if event.type == pg.QUIT:
@@ -124,38 +222,98 @@ def main():
                         sys.exit()
                     if event.type == pg.KEYDOWN:
                       if event.key == pg.K_RETURN:
-                           end = False
-                           start = True
+                           main()
             over.update(screen)
-        for event in pg.event.get():
-            if event.type == pg.QUIT: return
+        
         key_lst = pg.key.get_pressed()
         x = -1
         y = 0
         if key_lst[pg.K_UP]:
             y = -1
-        elif key_lst[pg.K_DOWN]:
+        if key_lst[pg.K_DOWN]:
             y = 1
-        elif key_lst[pg.K_RIGHT]:
+        if key_lst[pg.K_RIGHT]:
             x = 2
-        elif key_lst[pg.K_LEFT]:
+        if key_lst[pg.K_LEFT]:
             x = -1
+
         kk_rct.move_ip([x, y])
+
+        if not coin.active == True:  # コインの生成を操作
+            spawn_timer += 1
+            if spawn_timer >= spawn_interval:
+                coin.reset()
+                spawn_timer = 0
+
+        coin.update()  # コインの更新
+        if coin.active == True and kk_rct.colliderect(coin.rect):  # こうかとんがコインに衝突したときの処理
+            score.increment()
+            coin.active = False
+
+
+        dx = -0.5 #追加
+        dy = 0    #追加
+        gamengai_rect(kk_rct, dx, dy, screen) #追加
         z = tmr%3200
-        dead.x = kk_rct.x
-        dead.y = kk_rct.y 
         screen.blit(bg_img, [-z, 0])
         screen.blit(bg_img2, [-z+1600, 0])
         screen.blit(bg_img, [-z+3200, 0])
         screen.blit(bg_img2, [-z+4800, 0])
         screen.blit(kk_img, kk_rct)
-        zan.update(screen)
-        pg.display.update()
-        tmr += 1        
-        clock.tick(200)
+        if zan.value != 0:
+            if obstacle_timer <= 0 and len(obstacles) < max_obtacles:
+                x = random.randint(800, 1600)
+                y = random.randint(100, 500)
+                width = random.randint(100, 300)
+                height = 50
+                obstacles.append(Obstacle("fig/obstacle.png", x, y, width, height))
+                obstacle_timer = obstacle_interval
+            else:
+                obstacle_timer -= 1
+            for obstacle in obstacles:
+                obstacle.update()
+                obstacle.draw(screen)
+                if kk_rct.colliderect(obstacle.rect):
+                    zan.value -= 1
+
         
 
 
+        coin.draw(screen)  # コインの描画
+        score.draw(screen)  # スコアの描画
+
+
+        #追加↓
+        hours, minutes, seconds = time(tmr // 200)  
+        time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255)) 
+        screen.blit(time_text, (20, 20)) 
+        #追加↑
+        if tmr % 2000 == 0: #追加    
+            score.increase(1) #追加
+        dead.x = kk_rct.x
+        dead.y = kk_rct.y
+        zan.update(screen)
+        pg.display.update()
+        tmr += 1     
+        clock.tick(200)
+    
+        
+
+
+class Obstacle:
+    def __init__(self, image_path, x, y, width, height):
+        self.image = pg.transform.scale(pg.image.load(image_path), (width, height))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+    
+    def update(self):
+        self.rect.move_ip(-1, 0)
+        if self.rect.right < 0:
+            self.rect.left = 1600  # 再度右端から登場する.
+    
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        
 if __name__ == "__main__":
     pg.init()
     main()
