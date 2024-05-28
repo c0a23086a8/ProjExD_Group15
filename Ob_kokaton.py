@@ -200,7 +200,7 @@ class Obstacle:
     def update(self):
         self.rect.move_ip(-1, 0)
         if self.rect.right < 0:
-            self.rect.left = 1600  # 再度右端から登場する
+            self.rect.left = 1600  # 再度右端から登場する.
     
     def draw(self, screen):
         screen.blit(self.image, self.rect)
