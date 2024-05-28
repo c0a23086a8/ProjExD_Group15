@@ -102,6 +102,9 @@ def main():
         if zan.value == 0:
             while anime:
                 screen.blit(bg_img, [-z, 0])
+                screen.blit(bg_img2, [-z+1600, 0])
+                screen.blit(bg_img, [-z+3200, 0])
+                screen.blit(bg_img2, [-z+4800, 0])
                 frame +=1
                 if frame == 80:
                     anime = False
