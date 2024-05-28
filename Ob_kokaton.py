@@ -3,10 +3,86 @@ import sys
 import random
 import pygame as pg
 import time
+import math
 
+kkx=40
+kky=40
 
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+def aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr):                       #ゆー
+    global kkx,kky
+    if tmr % (5 * 60) == 0:  # 5秒ごとに 追加
+        kinoko_active = True  # 追加
+        kinoko_rct.topleft = (800, random.randint(0, 600 - kinoko_rct.height))  # 追加
+
+    if kinoko_active:  # 追加
+        kinoko_rct.move_ip(-3, 0)  # 追加
+        if kinoko_rct.right < 0:  # 追加
+            kinoko_active = False  # 追加
+
+    if kk_rct.colliderect(kinoko_rct):  # 追加
+        kkx+=10
+        kky+=10
+        kk_img = pg.transform.scale(kk_img, (kkx, kky))  # 追加
+        kk_rct = kk_img.get_rect(center=kk_rct.center)  # 追加
+        kinoko_rct.topleft = (-100, -100)  # アイテムを画面外に移動して消す 追加
+        kinoko_active = False  # 追加
+
+    return kinoko_active, kinoko_rct, kk_img                                                 #ゆー
+
+class title():
+        def __init__(self):
+            self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 70)
+            self.text = self.font.render("さけろ!こうかとん", True, (0, 0, 0))
+            self.text_rect = self.text.get_rect(center=(800/2,600/2))
+            self.bg_img = pg.image.load("fig/pg_bg.jpg")
+        def update(self,screen: pg.Surface):
+            screen.blit(self.bg_img, [0, 0])
+            screen.blit(self.text, self.text_rect)
+            pg.display.update()
+            pg.display.flip()
+
+class gameover():
+        def __init__(self):
+            self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 70)
+            self.text = self.font.render("Game Over", True, (255, 255, 255))
+            self.text_rect = self.text.get_rect(center=(800/2,600/2))
+        def update(self,screen: pg.Surface):
+            over_img = pg.Surface(( 800, 600 ))
+            pg.draw.rect(over_img, (0, 0, 0),(0, 0, 800, 600) , 0)
+            over_img.set_alpha( 1 )
+            screen.blit(over_img,[0, 0])
+            screen.blit(self.text, self.text_rect)
+            pg.display.update()
+            pg.display.flip()
+
+class die():
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.circles = 6
+        self.radius = 0
+        self.angle = 2*math.pi/self.circles
+    def update(self,screen:pg.Surface):
+        for i in range(self.circles):
+            a = self.angle * i
+            x = self.x + int(math.cos(a) * self.radius)
+            y = self.y + int(math.sin(a) * self.radius)
+            pg.draw.circle(screen, (255, 0, 0), (x, y), 30)
+        pg.display.flip()
+
+class zanki():
+    def __init__(self):
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.color = (0, 0, 255)
+        self.value = 2 #残機
+        self.image = self.font.render(f"残機: {self.value}", 0, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.center = 100, 50
+    def update(self, screen:pg.surface):
+        self.image = self.font.render(f"残機: {self.value}", 0, self.color)
 
 class Coin:
     """
@@ -86,48 +162,30 @@ def time(seconds): #追加
     seconds = seconds % 60
     return hours, minutes, seconds
 
-screen_width, screen_height = 800, 600
-
-WIDTH = 1600  # ゲームウィンドウの幅
-HEIGHT = 900  # ゲームウィンドウの高さ
-NUM_OF_BOMBS = 5  # 爆弾の数
-
-kkx=40
-kky=40
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-class Obstacle:
-    def __init__(self, image_path, x, y, width, height):
-        self.image = pg.transform.scale(pg.image.load(image_path), (width, height))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-    
-    def update(self):
-        self.rect.move_ip(-1, 0)
-        if self.rect.right < 0:
-            self.rect.left = 1600  # 再度右端から登場する.
-    
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
 
 def main():
-    global kkx,kky
-    pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((screen_width, screen_height))
-    clock = pg.time.Clock()
+    pg.display.set_caption("避けろ！こうかとん")
+    screen = pg.display.set_mode((800, 600))
+    clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bg_img2 = pg.transform.flip(bg_img, True, False)
     kk_img = pg.image.load("fig/3.png")
     kk_img = pg.transform.flip(kk_img, True, False)
-    kk_img = pg.transform.scale(kk_img, (kkx, kky))
+    kk_img = pg.transform.scale(kk_img, (kkx, kky))  #ゆー
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     obstacles = []
     obstacle_timer = 0
     obstacle_interval = 120
     max_obtacles = 10
-
+    title_screen = title()
+    over = gameover()
+    dead = die()
+    start = True
+    end = False
+    anime = True
+    frame = 0
+    zan = zanki()
 
     coin = Coin(800, 600)
     score = Score()
@@ -138,13 +196,66 @@ def main():
 
     font = pg.font.Font(None, 36) #追加
     tmr = 0
+
+    kinoko_img = pg.image.load("fig/kinoko.png")  # 追加　　　　　　　　　　　　　　　　　　　　　　ゆー
+    kinoko_img = pg.transform.scale(kinoko_img, (80, 80))
+    kinoko_rct = kinoko_img.get_rect()  # 追加
+    kinoko_rct.topleft = (800, random.randint(0, 600 - kinoko_rct.height))  # 追加
+    kinoko_active = False  # 追加
+    speed = 2                                                                             #ゆー
     
     while True:
+        
+        while start:
+                #タイトルスクリーンループ
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.KEYDOWN:
+                      if event.key == pg.K_RETURN:
+                        start = False
+                        zan.value = 2
+                title_screen.update(screen)
+        #試験
+        for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.KEYDOWN:
+                      if event.key == pg.K_q:
+                        zan.value -= 1
+
+        if zan.value == 0:
+            while anime:
+                screen.blit(bg_img, [-z, 0])
+                screen.blit(bg_img2, [-z+1600, 0])
+                screen.blit(bg_img, [-z+3200, 0])
+                screen.blit(bg_img2, [-z+4800, 0])
+                frame +=1
+                if frame == 80:
+                    anime = False
+                    frame = 0
+                dead.update(screen)
+                dead.radius += 2
+                pg.time.Clock().tick(60)
+            dead.radius = 0
+            anime = True
+            end = True
+
         for event in pg.event.get():
 
             if event.type == pg.QUIT: return
-
-
+        while end:
+            for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.KEYDOWN:
+                      if event.key == pg.K_RETURN:
+                           main()
+            over.update(screen)
+        
         key_lst = pg.key.get_pressed()
         x = -1
         y = 0
@@ -158,6 +269,7 @@ def main():
             x = -1
 
         kk_rct.move_ip([x, y])
+        kinoko_active, kinoko_rct, kk_img = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)  # 追加
 
         if not coin.active == True:  # コインの生成を操作
             spawn_timer += 1
@@ -174,22 +286,30 @@ def main():
         dx = -0.5 #追加
         dy = 0    #追加
         gamengai_rect(kk_rct, dx, dy, screen) #追加
-        
-        if obstacle_timer <= 0 and len(obstacles) < max_obtacles:
-            x = random.randint(800, 1600)
-            y = random.randint(100, 500)
-            width = random.randint(100, 300)
-            height = 50
-            obstacles.append(Obstacle("fig/obstacle.png", x, y, width, height))
-            obstacle_timer = obstacle_interval
-        else:
-            obstacle_timer -= 1
-        for obstacle in obstacles:
-            obstacle.update()
-            obstacle.draw(screen)
-            if kk_rct.colliderect(obstacle.rect):
-                time.sleep(1)
-                return
+        z = tmr%3200
+        screen.blit(bg_img, [-z, 0])
+        screen.blit(bg_img2, [-z+1600, 0])
+        screen.blit(bg_img, [-z+3200, 0])
+        screen.blit(bg_img2, [-z+4800, 0])
+        screen.blit(kk_img, kk_rct)
+        if kinoko_active:  # 追加　　　　　　　　　　　　　　　　　ゆー
+            screen.blit(kinoko_img, kinoko_rct)  # 追加　　　　　ゆー
+        if zan.value != 0:
+            if obstacle_timer <= 0 and len(obstacles) < max_obtacles:
+                x = random.randint(800, 1600)
+                y = random.randint(100, 500)
+                width = random.randint(100, 300)
+                height = 50
+                obstacles.append(Obstacle("fig/obstacle.png", x, y, width, height))
+                obstacle_timer = obstacle_interval
+            else:
+                obstacle_timer -= 1
+            for obstacle in obstacles:
+                obstacle.update()
+                obstacle.draw(screen)
+                if kk_rct.colliderect(obstacle.rect):
+                    zan.value -= 1
+
         
 
 
@@ -198,13 +318,15 @@ def main():
 
 
         #追加↓
-        hours, minutes, seconds = time(tmr // 60)  
+        hours, minutes, seconds = time(tmr // 200)  
         time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255)) 
         screen.blit(time_text, (20, 20)) 
         #追加↑
-        if tmr % 600 == 0: #追加    
+        if tmr % 2000 == 0: #追加    
             score.increase(1) #追加
-
+        dead.x = kk_rct.x
+        dead.y = kk_rct.y
+        zan.update(screen)
         pg.display.update()
         tmr += 1     
         clock.tick(200)
@@ -212,80 +334,20 @@ def main():
         
 
 
-
+class Obstacle:
+    def __init__(self, image_path, x, y, width, height):
+        self.image = pg.transform.scale(pg.image.load(image_path), (width, height))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+    
+    def update(self):
+        self.rect.move_ip(-1, 0)
+        if self.rect.right < 0:
+            self.rect.left = 1600  # 再度右端から登場する.
+    
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
         
-
-        kuki_img = pg.image.load("fig/kuki.png")
-        kuki_img = pg.transform.scale(kuki_img, (100, 130))
-        kuki_rct = kuki_img.get_rect()
-        kuki_rct.topleft = (screen_width, random.randint(0, screen_height - kuki_rct.height))
-        kuki_speed = -2
-
-        kinoko_img = pg.image.load("fig/kinoko.png")
-        kinoko_img = pg.transform.scale(kinoko_img, (100, 130)) 
-        kinoko_rct = kinoko_img.get_rect()
-        kinoko_rct.topleft = (screen_width, random.randint(0, screen_height - kinoko_rct.height))
-        kinoko_speed = -3
-
-        
-
-        speed = 2
-        kuki_timer = 0
-        kuki_active = False
-        kinoko_timer = 0
-        kinoko_active = False
-
-        kk_rct.move_ip(x, y)
-
-        if kk_rct.colliderect(kuki_rct):
-            speed += 3
-            kuki_rct.topleft = (-100, -100)  # アイテムを画面外に移動して消すやつ
-
-        if tmr % (20 * 60) == 0:  # 20秒ごとに
-            kuki_active = True
-            kuki_rct.topleft = (screen_width, random.randint(0, screen_height - kuki_rct.height))
-            kuki_timer = 0
-
-        if kuki_active:
-            kuki_rct.move_ip(kuki_speed, 0)
-            if kuki_rct.right < 0:
-                kuki_active = False
-
-        if tmr % (5 * 60) == 0:  # 5秒ごとに
-            kinoko_active = True
-            kinoko_rct.topleft = (screen_width, random.randint(0, screen_height - kinoko_rct.height))
-            kinoko_timer = 0
-
-        if kinoko_active:
-            kinoko_rct.move_ip(kinoko_speed, 0)
-            if kinoko_rct.right < 0:
-                kinoko_active = False
-
-        if kk_rct.colliderect(kinoko_rct):
-            kkx+=10
-            kky+=10
-            kk_img = pg.transform.scale(kk_img, (kkx, kky))
-            
-            
-            kk_rct = kk_img.get_rect(center=kk_rct.center)
-            kinoko_rct.topleft = (-100, -100)  # アイテムを画面外に移動して消すやつ
-            kinoko_active = False
-
-            z = tmr % 3200
-            screen.blit(bg_img, [-z, 0])
-            screen.blit(bg_img2, [-z + 1600, 0])
-            screen.blit(bg_img, [-z + 3200, 0])
-            screen.blit(bg_img2, [-z + 4800, 0])
-            screen.blit(kk_img, kk_rct)
-            if kuki_active:
-                screen.blit(kuki_img, kuki_rct)
-            if kinoko_active:
-                screen.blit(kinoko_img, kinoko_rct)
-
-            pg.display.update()
-            tmr += 1
-            clock.tick(60)
-
 if __name__ == "__main__":
     pg.init()
     main()
