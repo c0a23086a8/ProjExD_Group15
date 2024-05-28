@@ -55,14 +55,6 @@ class Score:
         score_surf = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
         screen.blit(score_surf, (20, 60))  # スコアのテキストを描画
 
-#class Score: #追加
-    #def __init__(self):
-        #self.value = -1
-        #self.timer = 0 
-
-    #def increase(self, amount):
-        #self.value += amount
-
 
 def gamengai_rect(rect, dx, dy, screen): # 追加
     """
@@ -171,10 +163,6 @@ def main():
         #追加↑
         if tmr % 600 == 0: #追加    
             score.increase(1) #追加
-        #追加↓
-        #score_text = font.render("Score: {}".format(score.value), True, (255, 255, 255))
-        #screen.blit(score_text, (20, 60))
-        #追加↑
 
         pg.display.update()
         tmr += 1     
