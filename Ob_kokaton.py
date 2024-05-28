@@ -187,10 +187,8 @@ def main():
         pg.display.update()
         tmr += 1     
         clock.tick(200)
+
     
-        
-
-
 class Obstacle:
     def __init__(self, image_path, x, y, width, height):
         self.image = pg.transform.scale(pg.image.load(image_path), (width, height))
@@ -205,7 +203,6 @@ class Obstacle:
     def draw(self, screen):
         screen.blit(self.image, self.rect)
         
-
 
 if __name__ == "__main__":
     pg.init()
