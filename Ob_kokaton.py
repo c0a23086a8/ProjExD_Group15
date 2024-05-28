@@ -3,6 +3,8 @@ import sys
 import random
 import pygame as pg
 
+
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class Coin:
@@ -40,14 +42,57 @@ class Score:
     """
     def __init__(self):
         self.font = pg.font.Font(None, 36)  # フォントを設定
-        self.score = 0  # スコアを初期化
+        self.score = -1  # スコアを初期化
+        self.timer = 0  # 追加
 
     def increment(self):
         self.score += 1  # スコアを1増加
+        
+    def increase(self, amount):#追加
+        self.score += amount
 
     def draw(self, screen):
         score_surf = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
-        screen.blit(score_surf, (10, 10))  # スコアのテキストを描画
+        screen.blit(score_surf, (20, 60))  # スコアのテキストを描画
+
+#class Score: #追加
+    #def __init__(self):
+        #self.value = -1
+        #self.timer = 0 
+
+    #def increase(self, amount):
+        #self.value += amount
+
+
+def gamengai_rect(rect, dx, dy, screen): # 追加
+    """
+    画面外に行かないようにする関数
+    
+    """
+    rect.x += dx
+    rect.y += dy
+    if rect.x < 0:
+        rect.x = 0
+    elif rect.x > screen.get_width() - rect.width:
+        rect.x = screen.get_width() - rect.width
+    if rect.y < 0:
+        rect.y = 0
+    elif rect.y > screen.get_height() - rect.height:
+        rect.y = screen.get_height() - rect.height
+
+
+def time(seconds): #追加
+    """
+    経過時間の計算をする関数
+    hours   ; 時
+    minutes ; 分
+    seconds ; 秒
+    """
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return hours, minutes, seconds
+
 
 def main():
     pg.display.set_caption("避けろ！こうかとん")
@@ -60,16 +105,22 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
 
+
     coin = Coin(800, 600)
     score = Score()
 
     spawn_interval = 100  # コインの生成間隔
     spawn_timer = 0  # タイマーの初期化
 
+
+    font = pg.font.Font(None, 36) #追加
     tmr = 0
+    
     while True:
         for event in pg.event.get():
+
             if event.type == pg.QUIT: return
+
 
         key_lst = pg.key.get_pressed()
         x = -1
@@ -78,7 +129,6 @@ def main():
             y = -1
         if key_lst[pg.K_DOWN]:
             y = 1
-
         if key_lst[pg.K_RIGHT]:
             x = 2
         if key_lst[pg.K_LEFT]:
@@ -97,6 +147,11 @@ def main():
             score.increment()
             coin.active = False
 
+
+        dx = -0.5 #追加
+        dy = 0    #追加
+        gamengai_rect(kk_rct, dx, dy, screen) #追加
+
         z = tmr%3200
         screen.blit(bg_img, [-z, 0])
         screen.blit(bg_img2, [-z+1600, 0])
@@ -104,11 +159,25 @@ def main():
         screen.blit(bg_img2, [-z+4800, 0])
         screen.blit(kk_img, kk_rct)
 
+
         coin.draw(screen)  # コインの描画
         score.draw(screen)  # スコアの描画
 
+
+        #追加↓
+        hours, minutes, seconds = time(tmr // 60)  
+        time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255)) 
+        screen.blit(time_text, (20, 20)) 
+        #追加↑
+        if tmr % 600 == 0: #追加    
+            score.increase(1) #追加
+        #追加↓
+        #score_text = font.render("Score: {}".format(score.value), True, (255, 255, 255))
+        #screen.blit(score_text, (20, 60))
+        #追加↑
+
         pg.display.update()
-        tmr += 1        
+        tmr += 1     
         clock.tick(200)
         
 
