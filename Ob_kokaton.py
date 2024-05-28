@@ -2,6 +2,7 @@ import os
 import sys
 import random
 import pygame as pg
+import time
 
 
 
@@ -96,6 +97,10 @@ def main():
     kk_img = pg.transform.flip(kk_img, True, False)
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
+    obstacles = []
+    obstacle_timer = 0
+    obstacle_interval = 120
+    max_obtacles = 10
 
 
     coin = Coin(800, 600)
@@ -143,13 +148,28 @@ def main():
         dx = -0.5 #追加
         dy = 0    #追加
         gamengai_rect(kk_rct, dx, dy, screen) #追加
-
         z = tmr%3200
         screen.blit(bg_img, [-z, 0])
         screen.blit(bg_img2, [-z+1600, 0])
         screen.blit(bg_img, [-z+3200, 0])
         screen.blit(bg_img2, [-z+4800, 0])
         screen.blit(kk_img, kk_rct)
+        if obstacle_timer <= 0 and len(obstacles) < max_obtacles:
+            x = random.randint(800, 1600)
+            y = random.randint(100, 500)
+            width = random.randint(100, 300)
+            height = 50
+            obstacles.append(Obstacle("fig/obstacle.png", x, y, width, height))
+            obstacle_timer = obstacle_interval
+        else:
+            obstacle_timer -= 1
+        for obstacle in obstacles:
+            obstacle.update()
+            obstacle.draw(screen)
+            if kk_rct.colliderect(obstacle.rect):
+                time.sleep(1)
+                return
+        
 
 
         coin.draw(screen)  # コインの描画
@@ -167,6 +187,23 @@ def main():
         pg.display.update()
         tmr += 1     
         clock.tick(200)
+    
+        
+
+
+class Obstacle:
+    def __init__(self, image_path, x, y, width, height):
+        self.image = pg.transform.scale(pg.image.load(image_path), (width, height))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+    
+    def update(self):
+        self.rect.move_ip(-1, 0)
+        if self.rect.right < 0:
+            self.rect.left = 1600  # 再度右端から登場する
+    
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
         
 
 
