@@ -177,11 +177,11 @@ def main():
 
 
         #追加↓
-        hours, minutes, seconds = time(tmr // 60)  
+        hours, minutes, seconds = time(tmr // 200)  
         time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255)) 
         screen.blit(time_text, (20, 20)) 
         #追加↑
-        if tmr % 600 == 0: #追加    
+        if tmr % 2000 == 0: #追加    
             score.increase(1) #追加
 
         pg.display.update()
