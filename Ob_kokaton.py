@@ -4,11 +4,11 @@ import pygame as pg
 import math
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
+#タイトル画面
 class title():
         def __init__(self):
             self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 70)
-            self.text = self.font.render("よけろこうかとん（仮）", True, (0, 0, 0))
+            self.text = self.font.render("さけろ!こうかとん", True, (0, 0, 0))
             self.text_rect = self.text.get_rect(center=(800/2,600/2))
             self.bg_img = pg.image.load("fig/pg_bg.jpg")
         def update(self,screen: pg.Surface):
@@ -16,7 +16,7 @@ class title():
             screen.blit(self.text, self.text_rect)
             pg.display.update()
             pg.display.flip()
-
+#ゲームオーバー画面
 class gameover():
         def __init__(self):
             self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 70)
@@ -31,7 +31,7 @@ class gameover():
             screen.blit(self.text, self.text_rect)
             pg.display.update()
             pg.display.flip()
-
+#死亡時演出
 class die():
     def __init__(self):
         self.x = 0
@@ -46,12 +46,12 @@ class die():
             y = self.y + int(math.sin(a) * self.radius)
             pg.draw.circle(screen, (255, 0, 0), (x, y), 30)
         pg.display.flip()
-
+#残機処理
 class zanki():
     def __init__(self):
         self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
         self.color = (0, 0, 255)
-        self.value = 2
+        self.value = 2 #残機
         self.image = self.font.render(f"残機: {self.value}", 0, self.color)
         self.rect = self.image.get_rect()
         self.rect.center = 100, 50
@@ -60,7 +60,7 @@ class zanki():
         screen.blit(self.image, self.rect)
 
 def main():
-    pg.display.set_caption("はばたけ！こうかとん")
+    pg.display.set_caption("さけろ！こうかとん")
     screen = pg.display.set_mode((800, 600))
     clock  = pg.time.Clock()
     bg_img = pg.image.load("fig/pg_bg.jpg")
@@ -80,6 +80,7 @@ def main():
     frame = 0
     while True:
         while start:
+                #タイトルスクリーンループ
                 for event in pg.event.get():
                     if event.type == pg.QUIT:
                         pg.quit()
@@ -98,7 +99,7 @@ def main():
                     if event.type == pg.KEYDOWN:
                       if event.key == pg.K_q:
                         zan.value -= 1
-
+        #死亡時演出
         if zan.value == 0:
             while anime:
                 screen.blit(bg_img, [-z, 0])
@@ -115,6 +116,7 @@ def main():
             dead.radius = 0
             anime = True
             end = True
+        #ゲームオーバー画面ループ
         while end:
             for event in pg.event.get():
                     if event.type == pg.QUIT:
