@@ -10,6 +10,13 @@ kky = 40
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+
+def reset_kkx_kky():#追加
+    global kkx, kky
+    kkx = 40
+    kky = 40
+    
+
 def aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr):
     global kkx, kky
     if tmr % (5 * 60) == 0:  # 5秒ごとに追加
@@ -84,9 +91,9 @@ class zanki():
         self.rect = self.image.get_rect()
         self.rect.center = 100, 50
 
-    def update(self, screen: pg.Surface):
+    def update(self, screen: pg.surface):
         self.image = self.font.render(f"残機: {self.value}", 0, self.color)
-        screen.blit(self.image, self.rect)
+        #screen.blit(self.image, self.rect)
 
 class Coin:
     """
@@ -108,13 +115,13 @@ class Coin:
         self.active = True  # コインをアクティブにする
 
     def update(self):
-        if self.active:
+        if self.active == True:
             self.rect.x -= self.speed  # コインを移動させる
             if self.rect.right < 0:
                 self.active = False  # コインが画面外に出たときに、非アクティブにする
 
     def draw(self, screen):
-        if self.active:
+        if self.active == True:
             screen.blit(self.image, self.rect)  # コインを描画する
 
 class Score:
@@ -123,7 +130,7 @@ class Score:
     """
     def __init__(self):
         self.font = pg.font.Font(None, 36)  # フォントを設定
-        self.score = 0  # スコアを初期化
+        self.score = -1  # スコアを初期化
         self.timer = 0  # 追加
 
     def increment(self):
@@ -136,7 +143,7 @@ class Score:
         score_surf = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
         screen.blit(score_surf, (20, 60))  # スコアのテキストを描画
 
-def gamengai_rect(rect, screen):
+def gamengai_rect(rect, screen):#追加
     """
     画面外に行かないようにする関数
     """
@@ -149,7 +156,7 @@ def gamengai_rect(rect, screen):
     elif rect.y > screen.get_height() - rect.height:
         rect.y = screen.get_height() - rect.height
 
-def time(seconds):
+def time(seconds):#追加
     """
     経過時間の計算をする関数
     hours   ; 時
@@ -214,11 +221,11 @@ def main():
                         start = False
                         zan.value = 2
                         # Reset the game variables
-                        obstacles.clear()
-                        score.score = 0
-                        tmr = 0
-                        z = 0
-            title_screen.update(screen)
+                        #obstacles.clear()
+                        #score.score = 0
+                        #tmr = 0
+                        #z = 0
+                title_screen.update(screen)
         
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -240,11 +247,13 @@ def main():
                     frame = 0
                 dead.update(screen)
                 dead.radius += 2
-                pg.time.Clock().tick(60)
+                pg.time.Clock().tick(200) #注意
             dead.radius = 0
             anime = True
             end = True
-
+        for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    return
         while end:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -252,34 +261,37 @@ def main():
                     sys.exit()
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_RETURN:
-                        start = True
-                        end = False
+                        reset_kkx_kky()#追加
+                        main() #変更
             over.update(screen)
         
         key_lst = pg.key.get_pressed()
+        x = -1
+        y = 0
         if key_lst[pg.K_UP]:
-            kk_rct.move_ip(0, -3)
+            y = -1
         if key_lst[pg.K_DOWN]:
-            kk_rct.move_ip(0, 3)
+            y = 1
         if key_lst[pg.K_RIGHT]:
-            kk_rct.move_ip(3, 0)
+            x = 2
         if key_lst[pg.K_LEFT]:
-            kk_rct.move_ip(-3, 0)
-
+            x = -1
+        kk_rct.move_ip([x, y])
         kinoko_active, kinoko_rct, kk_img = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)
 
-        if not coin.active:
+        if not coin.active == True:
             spawn_timer += 1
             if spawn_timer >= spawn_interval:
                 coin.reset()
                 spawn_timer = 0
 
         coin.update()
-        if coin.active and kk_rct.colliderect(coin.rect):
+        if coin.active == True and kk_rct.colliderect(coin.rect):
             score.increment()
             coin.active = False
 
         gamengai_rect(kk_rct, screen)
+
 
         z = tmr % 3200
         screen.blit(bg_img, [-z, 0])
@@ -304,23 +316,21 @@ def main():
                 obstacle.draw(screen)
                 if kk_rct.colliderect(obstacle.rect):
                     zan.value -= 1
-                    obstacles.remove(obstacle)  # 追加：ぶつかった障害物をリストから削除
-
         coin.draw(screen)
         score.draw(screen)
-
-        hours, minutes, seconds = time(tmr // 200)
+        #追加↓
+        hours, minutes, seconds = time(tmr // 200)#変更
         time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255))
         screen.blit(time_text, (20, 20))
-
-        if tmr % 2000 == 0:
-            score.increase(1)
+        #追加↑
+        if tmr % 2000 == 0:#追加　変更
+            score.increase(1)#追加
         dead.x = kk_rct.x
         dead.y = kk_rct.y
         zan.update(screen)
         pg.display.update()
         tmr += 1
-        clock.tick(60)
+        clock.tick(200)
 
 class Obstacle:
     def __init__(self, image_path, x, y, width, height):
