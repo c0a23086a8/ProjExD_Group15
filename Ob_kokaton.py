@@ -220,11 +220,6 @@ def main():
                     if event.key == pg.K_RETURN:
                         start = False
                         zan.value = 2
-                        # Reset the game variables
-                        #obstacles.clear()
-                        #score.score = 0
-                        #tmr = 0
-                        #z = 0
                 title_screen.update(screen)
         
         for event in pg.event.get():
