@@ -188,7 +188,7 @@ def main():
     kk_rct.center = 300, 200
     obstacles = []
     obstacle_timer = 0
-    obstacle_interval = 150
+    obstacle_interval = 160
     max_obstacles = 10
     title_screen = title()
     over = gameover()
