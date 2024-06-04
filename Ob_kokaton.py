@@ -192,10 +192,13 @@ def main():
     frame = 0
     zan = zanki()
 
-    coin = Coin(800, 600)
+    coins = []
+    for _ in range(3):
+        coin = Coin(800, 600)
+        coins.append(coin)
     score = Score()
 
-    spawn_interval = 100  # コインの生成間隔
+    spawn_interval = 50  # コインの生成間隔
     spawn_timer = 0  # タイマーの初期化
 
     font = pg.font.Font(None, 36)  # 追加
@@ -274,17 +277,20 @@ def main():
         kk_rct.move_ip([x, y])
         kinoko_active, kinoko_rct, kk_img, kk_rct = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)
 
-        if not coin.active == True:
-            spawn_timer += 1
-            if spawn_timer >= spawn_interval:
-                coin.reset()
-                spawn_timer = 0
+        spawn_timer += 1
+        if spawn_timer >= spawn_interval:
+            for coin in coins:
+                if not coin.active:
+                    coin.reset()
+                    break
+            spawn_timer = 0
 
-        coin.update()
-        if coin.active == True and kk_rct.colliderect(coin.rect):
-            score.increment()
-            coin.active = False
-
+        for coin in coins:
+            coin.update()
+            if coin.active and kk_rct.colliderect(coin.rect):
+                score.increment()
+                coin.active = False
+            
         gamengai_rect(kk_rct, screen)
 
 
@@ -311,7 +317,8 @@ def main():
                 obstacle.draw(screen)
                 if kk_rct.colliderect(obstacle.rect):
                     zan.value -= 1
-        coin.draw(screen)
+        for coin in coins:
+            coin.draw(screen)
         score.draw(screen)
         #追加↓
         hours, minutes, seconds = time(tmr // 200)#変更
