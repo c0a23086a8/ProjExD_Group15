@@ -143,18 +143,24 @@ class Score:
         score_surf = self.font.render(f"Score: {self.score}", True, (0, 0, 0))
         screen.blit(score_surf, (20, 60))  # スコアのテキストを描画
 
+
 def gamengai_rect(rect, screen):#追加
     """
     画面外に行かないようにする関数
     """
+    #もし矩形の左端が画面の左端よりも左に行こうとしている場合、矩形の左端を画面の左端に設定します。
     if rect.x < 0:
         rect.x = 0
+    #もし矩形の右端が画面の右端よりも右に行こうとしている場合、矩形の右端を画面の右端に設定します。
     elif rect.x > screen.get_width() - rect.width:
         rect.x = screen.get_width() - rect.width
+    #もし矩形の上端が画面の上端よりも上に行こうとしている場合、矩形の上端を画面の上端に設定します。
     if rect.y < 0:
         rect.y = 0
+    #もし矩形の下端が画面の下端よりも下に行こうとしている場合、矩形の下端を画面の下端に設定します。
     elif rect.y > screen.get_height() - rect.height:
         rect.y = screen.get_height() - rect.height
+
 
 def time(seconds):#追加
     """
@@ -163,10 +169,11 @@ def time(seconds):#追加
     minutes ; 分
     seconds ; 秒
     """
-    hours = seconds // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
+    hours = seconds // 3600          # 時間を計算
+    minutes = (seconds % 3600) // 60 # 分を計算
+    seconds = seconds % 60           # 秒を計算
     return hours, minutes, seconds
+
 
 def main():
     pg.display.set_caption("避けろ！こうかとん")
@@ -245,7 +252,7 @@ def main():
                     frame = 0
                 dead.update(screen)
                 dead.radius += 2
-                pg.time.Clock().tick(200) #注意
+                pg.time.Clock().tick(200) 
             dead.radius = 0
             anime = True
             end = True
@@ -277,6 +284,19 @@ def main():
         kk_rct.move_ip([x, y])
         kinoko_active, kinoko_rct, kk_img, kk_rct = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)
 
+        if not coin.active == True:
+            spawn_timer += 1
+            if spawn_timer >= spawn_interval:
+                coin.reset()
+                spawn_timer = 0
+
+        coin.update()
+        if coin.active == True and kk_rct.colliderect(coin.rect):
+            score.increment()
+            coin.active = False
+
+        gamengai_rect(kk_rct, screen)# 追加 
+        
         spawn_timer += 1
         if spawn_timer >= spawn_interval:
             for coin in coins:
@@ -292,8 +312,7 @@ def main():
                 coin.active = False
             
         gamengai_rect(kk_rct, screen)
-
-
+        
         z = tmr % 3200
         screen.blit(bg_img, [-z, 0])
         screen.blit(bg_img2, [-z + 1600, 0])
@@ -320,13 +339,13 @@ def main():
         for coin in coins:
             coin.draw(screen)
         score.draw(screen)
-        #追加↓
-        hours, minutes, seconds = time(tmr // 200)#変更
+        #追加↓ メインのゲームループ内で時間を表示する部分
+        hours, minutes, seconds = time(tmr // 200)#変更 200フレームごとに増加
         time_text = font.render("Time: {:02d}:{:02d}:{:02d}".format(hours, minutes, seconds), True, (255, 255, 255))
         screen.blit(time_text, (20, 20))
         #追加↑
-        if tmr % 2000 == 0:#追加　変更
-            score.increase(1)#追加
+        if tmr % 2000 == 0:#追加 2000フレームごとに増加
+            score.increase(1)#追加 スコアを1増やす
         dead.x = kk_rct.x
         dead.y = kk_rct.y
         zan.update(screen)
