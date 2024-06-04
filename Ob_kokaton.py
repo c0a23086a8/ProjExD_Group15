@@ -19,7 +19,7 @@ def reset_kkx_kky():#追加
 
 def aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr):
     global kkx, kky
-    if tmr % (5 * 60) == 0:  # 5秒ごとに追加
+    if tmr % (5 * 200) == 0:  # 5秒ごとに追加
         kinoko_active = True
         kinoko_rct.topleft = (800, random.randint(0, 600 - kinoko_rct.height))
 
@@ -36,7 +36,7 @@ def aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr):
         kinoko_rct.topleft = (-100, -100)
         kinoko_active = False
 
-    return kinoko_active, kinoko_rct, kk_img
+    return kinoko_active, kinoko_rct, kk_img, kk_rct
 
 class title():
     def __init__(self):
@@ -272,7 +272,7 @@ def main():
         if key_lst[pg.K_LEFT]:
             x = -1
         kk_rct.move_ip([x, y])
-        kinoko_active, kinoko_rct, kk_img = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)
+        kinoko_active, kinoko_rct, kk_img, kk_rct = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)
 
         if not coin.active == True:
             spawn_timer += 1
