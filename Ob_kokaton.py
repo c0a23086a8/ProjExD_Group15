@@ -188,7 +188,7 @@ def main():
     kk_rct.center = 300, 200
     obstacles = []
     obstacle_timer = 0
-    obstacle_interval = 180
+    obstacle_interval = 150
     max_obstacles = 10
     title_screen = title()
     over = gameover()
@@ -274,13 +274,13 @@ def main():
         x = -1
         y = 0
         if key_lst[pg.K_UP]:
-            y = -1
+            y = -2
         if key_lst[pg.K_DOWN]:
-            y = 1
+            y = 2
         if key_lst[pg.K_RIGHT]:
             x = 2
         if key_lst[pg.K_LEFT]:
-            x = -1
+            x = -2
         kk_rct.move_ip([x, y])
         kinoko_active, kinoko_rct, kk_img, kk_rct = aitemu(kinoko_active, kinoko_rct, kinoko_img, kk_rct, kk_img, tmr)
 
